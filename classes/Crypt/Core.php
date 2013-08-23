@@ -20,7 +20,12 @@ class Crypt_Core {
      * @var  string  OS-dependent RAND type to use
      */
     protected static $_rand;
-
+    
+    /**
+     * @var string  Error encountered
+     */
+    public static $last_error = null;
+    
     /**
      * Returns a singleton instance of Encrypt. An encryption key must be
      * provided in your "encrypt" configuration file.
@@ -195,8 +200,9 @@ class Crypt_Core {
     {
         $data = explode($this->_delimiter, $data);
     
-        if (count($data) === 2)
+        if (count($data) !== 2)
         {
+            self::$last_error = 'Invalid number of parameters.';
             return false;
         }
         
@@ -208,7 +214,8 @@ class Crypt_Core {
         if ( ! $data)
         {
             // Invalid base64 data
-            return FALSE;
+            self::$last_error = 'Not BASE64.';
+            return false;
         }
         
         // Extract the initialization vector from the data
@@ -217,6 +224,7 @@ class Crypt_Core {
         if ($this->_iv_size !== strlen($iv))
         {
             // The iv is not the expected size
+            self::$last_error = 'Invalid IV size.';
             return FALSE;
         }
 
@@ -233,6 +241,7 @@ class Crypt_Core {
             return $data;
         }
         
+        self::$last_error = 'Data might be tampered.';
         return false;
     }
 
